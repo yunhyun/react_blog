@@ -1,3 +1,5 @@
+// 실행 yarn start:dev (수정하면 자동 리로드)
+
 const Koa = require('koa');
 const Router = require('koa-router');
 const bodyParser = require('koa-bodyparser');
