@@ -1,8 +1,31 @@
 // 실행 yarn start:dev (수정하면 자동 리로드)
 
+// dotenv는 환경변수를 파일에 넣고 사용할 수 있게 하는 개발도구 
+// 서버 계정, 비번 등을 소스에 직접 쓰지 않고 환경변수 파일을 가지고 관리
+// (환경변수 파일은 gitignore 파일로 깃에 안올리도록)
+require('dotenv').config();
+
 const Koa = require('koa');
 const Router = require('koa-router');
 const bodyParser = require('koa-bodyparser');
+
+// mongoose 가져오기 
+const mongoose = require('mongoose');
+
+// 비구조화 할당을 통해 process.env 내부 값에 대한 레퍼런스 만들기 
+// .env에 지정한 PORT 값을 가져옴(PORT = 4000)
+const { PORT, MONGO_URI } = process.env;
+
+// mongoDB 접속 
+// 아래 코드 작성 후 yarn start:dev 실행하면 MongoDB 연결 성공 콘솔 메시지 출력됨 
+mongoose
+    .connect(MONGO_URI, { useNewUrlParser: true, useFindAndModify:false })
+        .then(() => {
+            console.log('MongoDB 연결 성공');
+        })
+        .catch(e => {
+            console.error(e);
+        });
 
 // api 폴더에 생성한 index.js 사용 
 const api = require('./api');
@@ -20,6 +43,8 @@ app.use(bodyParser());
 // app 인스턴스에 라우터 적용 
 app.use(router.routes()).use(router.allowedMethods());
 
-app.listen(4000, () => {
-    console.log('4000 포트 시작');
-})
+// .env에 PORT 지정 안되어있으면 4000을 사용하도록 
+const port = PORT || 4000;
+app.listen(port, () => {
+    console.log('%d 포트 시작', port);
+});
