@@ -50,7 +50,7 @@ exports.remove = ctx => {
         };
         return;
     }
-    posts.slice(index, 1);
+    posts.splice(index, 1);
     ctx.status = 204; // no content
 };
 

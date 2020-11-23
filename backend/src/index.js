@@ -10,7 +10,8 @@ const api = require('./api');
 const app = new Koa();
 const router = new Router();
 
-// 라우트 설정 
+// 라우트 설정(api 폴더에 있는 index.js를 사용하기 위함, 
+// node는 파일명을 지정하지 않고 폴더만 지정해도 해당 폴더의 index.js를 자동으로 실행함)
 router.use('/api', api.routes());
 
 // app에 라우터 적용전에 bodyParser 적용 

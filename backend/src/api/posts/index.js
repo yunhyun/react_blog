@@ -4,7 +4,7 @@ const postsCtrl = require('./posts.ctrl');
 const posts = new Router();
 
 
-// 각 주소가 호출되면 printInfo 함수 호출 
+// 각 주소가 호출되면 해당 함수 호출 
 posts.get('/', postsCtrl.list);
 posts.post('/', postsCtrl.write);
 posts.get('/:id', postsCtrl.read);
