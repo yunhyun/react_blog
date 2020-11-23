@@ -1,8 +1,8 @@
 // 실행 yarn start:dev (수정하면 자동 리로드)
-
 // dotenv는 환경변수를 파일에 넣고 사용할 수 있게 하는 개발도구 
 // 서버 계정, 비번 등을 소스에 직접 쓰지 않고 환경변수 파일을 가지고 관리
 // (환경변수 파일은 gitignore 파일로 깃에 안올리도록)
+// require = require('esm')(module /*, options*/);
 require('dotenv').config();
 
 import Koa from 'koa';
@@ -21,8 +21,8 @@ const { PORT, MONGO_URI } = process.env;
 
 // mongoDB 접속 
 // 아래 코드 작성 후 yarn start:dev 실행하면 MongoDB 연결 성공 콘솔 메시지 출력됨 
-mongoose.
-    connect(MONGO_URI, { useNewUrlParser: true, useFindAndModify:false })
+mongoose
+    .connect(MONGO_URI, { useNewUrlParser: true })
         .then(() => {
             console.log('MongoDB 연결 성공');
         })

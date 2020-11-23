@@ -20,5 +20,5 @@
     "start": "node -r esm src",
     "start:dev": "nodemon --watch src/ -r esm src/index.js"
   },
-  "type": "module"
+  "sourceType": "module"
 }
