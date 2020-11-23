@@ -17,6 +17,9 @@ import api from './api';
 
 // 비구조화 할당을 통해 process.env 내부 값에 대한 레퍼런스 만들기 
 // .env에 지정한 PORT 값을 가져옴(PORT = 4000)
+// MONGO_URI=mongodb://localhost:27017/blog 에서 /blog가 DB 이름이 됨 
+// 따로 만들지 않아도 자동으로 생성됨. 이름을 test로 바꾸면 test가 생성됨 
+// 생성된 것은 Compass에서 확인 ㄴ
 const { PORT, MONGO_URI } = process.env;
 
 // mongoDB 접속 

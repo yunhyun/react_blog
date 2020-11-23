@@ -1,96 +1,76 @@
-let postId = 1;
-
-const posts = [
-    {
-        id: 1,
-        title: '제목1',
-        body: '내용',
-    },
-];
+import Post from '../../models/post';
 
 // 글작성 
-export const write = ctx => {
-    // rest api 의 요청 데이터는 ctx.request.body에 들어있음. 
-    const { title, body } = ctx.request.body;
-    postId += 1;
-    const post = { id: postId, title, body };
-    // 위에서 선언한 posts 배열에 추가 
-    posts.push(post);
-    ctx.body = post;
+export const write = async ctx => {
+    const { title, body, tags } = ctx.request.body;
+    const post = new Post({
+        title, 
+        body, 
+        tags,
+    });
+    try {
+        await post.save(); // save() : db에 저장하는 함수. await로 저장을 완료할 때 까지 대기함 
+        // await를 쓰려면 3번 라인처럼 async를 사용해야 함. 
+        ctx.body = post;
+    } catch (e) {
+        ctx.throw(500, e);
+    }
 };
 
 // 글목록 
-export const list = ctx => {
-    ctx.body = posts;
+export const list = async ctx => {
+    try {
+        // find 호출 후 exec를 호출해야 서버에 쿼리를 요청함 
+        const posts = await Post.find().exec();
+        ctx.body = posts;
+    } catch (e)  {
+        ctx.throw(500, e);
+    }
 };
 
-// 글조회 
-export const read = ctx => {
+export const read = async ctx => {
     const { id } = ctx.params;
-    const post = posts.find(p => p.id.toString() === id);
-    if(!post){
-        ctx.status = 404;
-        ctx.body = {
-            message: '포스트가 존재하지 않습니다.',
-        };
-        return;
+    try {
+        const post = await Post.findById(id).exec();
+        if(!post) {
+            ctx.status = 404;
+            return;
+        }
+        ctx.body = post;
+    } catch (e) {
+        ctx.throw(500, e);
     }
-    // 전체 글을 화면에 띄움 
-    ctx.body = post;
 };
 
-// 글삭제 
-export const remove = ctx => {
+export const remove = async ctx => {
     const { id } = ctx.params;
-    const index = posts.findIndex(p => p.id.toString() === id);  
-    if(index === -1) {
-        ctx.status = 404;
-        ctx.body = {
-            message: '포스트가 존재하지 않습니다.',
-        };
-        return;
+    try {
+        /*  remove() : 특정 조건 만족하는 데이터 모두 지움 
+            findByIdAndRemove() : id를 찾아서 지움 
+            findOneAndRemove() : 특정 조건 만족하는 데이터 하나 지움 */
+        await Post.findByIdAndRemove(id).exec();
+        ctx.status = 204;
+    } catch (e) {
+        ctx.throw(500, e);
     }
-    posts.splice(index, 1);
-    ctx.status = 204; // no content
 };
 
-// 글수정(전체 덮어쓰기) 
-export const replace = ctx => {
+export const update = async ctx => {
     const { id } = ctx.params;
-    const index = posts.findIndex(p => p.id.toString() === id);
-    if(index === -1) {
-        ctx.status = 404;
-        ctx.body = {
-            message: '포스트가 존재하지 않습니다.',
-        };
-        return;
+    try {
+        /* findByIdAndUpdate함수는 매개변수가 3개 
+            첫번째: id
+            두번째: 수정할 내용
+            세번째: true면 수정 후 데이터 post에 저장 
+                    false면 수정 전 데이터 post에 저장*/
+        const post = await Post.findByIdAndUpdate(id, ctx.request.body, { new: true, }).exec();
+        if(!post) {
+            ctx.status = 404;
+            return;
+        }
+        ctx.body = post;
+    } catch (e) {
+        ctx.throw(500, e);
     }
-    posts[index] = {
-        id,
-        ...ctx.request.body,
-    };
-    // 해당 글을 화면에 띄움 
-    ctx.body = posts[index];
-}
-
-// 글수정(일부 수정)
-export const update = ctx => {
-    const { id } = ctx.params;
-    const index = posts.findIndex(p => p.id.toString() === id);
-    if(index === -1) {
-        ctx.status = 404;
-        ctx.body = {
-            message: '포스트가 존재하지 않습니다.',
-        };
-        return;
-    }
-    posts[index] = {
-        ...posts[index],
-        ...ctx.request.body,
-    };
-    ctx.body = posts[index];
-
 };
-
-
 
