@@ -3,7 +3,9 @@ import mongoose from 'mongoose';
 import Joi from 'joi';
 
 /* 글조회, 글수정, 글삭제는 id를 받아와야 하는데 
-   id는 db에서 부여하는 것인데 양식이 복잡함(5fbb5b4159b11a1d800c20c2). 각 함수는 id가 맞지 않으면 404를 냄. 
+   id는 db에서 부여하는 것인데 양식이 복잡함(5fbb5b4159b11a1d800c20c2). 
+   id는 시간, 머신아이디, 프로세스아이디, 순차번호로 되어있어 고유함을 보장. 
+   각 함수는 id가 맞지 않으면 404를 냄. 
    따라서 id를 먼저 검증하고 글조회, 글수정, 글삭제 함수를 처리하도록 함 */
 
 // ObjectId 검증 함수 
@@ -19,7 +21,7 @@ export const checkObjectId = (ctx, next) => {
 };
    
 // 글작성 
-export const write = async ctx => {
+// export const write = async ctx => {
     // 제목, 본문 등이 작성됐는지 검증 
     // const schema = Joi.object().keys({
     //     // required()는 필수항목
@@ -39,7 +41,7 @@ export const write = async ctx => {
     //     ctx.body = result.error;
     //     return;
     // }
-
+export const write = async ctx => {
     const { title, body, tags } = ctx.request.body;
     const post = new Post({
         title, 
