@@ -59,7 +59,7 @@ export const login = async ctx => {
     }
     try {
         // 해당 계정이 있는지 없으면 에러 처리 
-        const user = await User.findByUsername(username);
+        const user = await User.findByUsername(username); // static 메소드라 User로 접근 
         if(!user) {
             ctx.status = 401;
             return;
@@ -83,7 +83,7 @@ export const login = async ctx => {
         ctx.throw(500, e);
     }
 };
-
+ 
 
 // 로그인 상태 확인 
 export const check = async ctx => {
@@ -95,6 +95,7 @@ export const check = async ctx => {
     }
     ctx.body = user;
 };
+
 // 로그아웃 
 export const logout = async ctx => {
     ctx.cookies.set('access_token');

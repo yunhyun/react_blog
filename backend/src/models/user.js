@@ -17,7 +17,7 @@ UserSchema.methods.setPassword = async function(password) {
     this.hashedPassword = hash;
 };
 
-// 비교 함수 
+// 비교 함수(입력한 비번을 암호화하여 일치여부 판단) 
 UserSchema.methods.checkPassword = async function(password) {
     const result = await bcrypt.compare(password, this.hashedPassword);
     return result;
