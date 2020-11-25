@@ -35,6 +35,14 @@ export const register = async ctx => {
 
         // 응답 데이터에서 hashedPassword 필드 제거 함수 호출 후 출력 
         ctx.body = user.serialize();
+
+        // 토큰 쿠키에 담기 
+        const token = user.generateToken();
+        ctx.cookies.set('access_token', token, {
+            maxAge: 1000 * 60 * 60 * 24 * 7, //7일 
+            httpOnly: true,
+        });
+
     } catch (e) {
         ctx.throw(500, e);
     }
@@ -64,6 +72,13 @@ export const login = async ctx => {
         }
         ctx.body = user.serialize();
         
+        // 토큰 쿠키에 담기(postman에서 실행하고 header 확인하면 cookie 보임)
+        const token = user.generateToken();
+        ctx.cookies.set('access_token', token, {
+            maxAge: 1000 * 60 * 60 * 24 * 7, //7일 
+            httpOnly: true,
+        });
+
     } catch (e) {
         ctx.throw(500, e);
     }
@@ -72,9 +87,16 @@ export const login = async ctx => {
 
 // 로그인 상태 확인 
 export const check = async ctx => {
-
+    const { user } = ctx.state;
+    if(!user) {
+        // 로그인 중이 아닐때 
+        ctx.status = 401;
+        return;
+    }
+    ctx.body = user;
 };
 // 로그아웃 
 export const logout = async ctx => {
-
+    ctx.cookies.set('access_token');
+    ctx.status = 204;
 };

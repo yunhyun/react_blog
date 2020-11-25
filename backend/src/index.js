@@ -14,6 +14,8 @@ import mongoose from 'mongoose';
 
 // api 폴더에 생성한 index.js 사용 
 import api from './api';
+// 토큰 검증을 위한 미들웨어 적용 
+import jwtMiddleware from './lib/jwtMiddleware';
 
 // 비구조화 할당을 통해 process.env 내부 값에 대한 레퍼런스 만들기 
 // .env에 지정한 PORT 값을 가져옴(PORT = 4000)
@@ -43,6 +45,8 @@ router.use('/api', api.routes());
 
 // app에 라우터 적용전에 bodyParser 적용 
 app.use(bodyParser());
+// 토큰 검증 
+app.use(jwtMiddleware);
 
 // app 인스턴스에 라우터 적용 
 app.use(router.routes()).use(router.allowedMethods());
