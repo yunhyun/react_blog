@@ -10,6 +10,8 @@ import { createStore } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
 import rootReducer from './modules';
 
+// redux 사용을 위한 부분 
+// yarn add redux-devtools-extension 으로 설치하고 크롬에도 설치해야 함 
 const store = createStore(rootReducer, composeWithDevTools());
 
 ReactDOM.render(
