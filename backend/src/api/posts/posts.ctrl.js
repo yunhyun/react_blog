@@ -1,6 +1,8 @@
 import Post from '../../models/post';
 import mongoose from 'mongoose';
 import Joi from 'joi';
+// db에 저장될 때 태그를 제거하는 라이브러리
+import sanitizeHtml from 'sanitize-html';
 
 /* 글조회, 글수정, 글삭제는 id를 받아와야 하는데 
    id는 db에서 부여하는 것인데 양식이 복잡함(5fbb5b4159b11a1d800c20c2). 
@@ -10,6 +12,30 @@ import Joi from 'joi';
 
 // ObjectId 검증 함수 
 const { ObjectId } = mongoose.Types;
+
+const sanitizeOption = {
+    allowedTags: [
+      'h1',
+      'h2',
+      'b',
+      'i',
+      'u',
+      's',
+      'p',
+      'ul',
+      'ol',
+      'li',
+      'blockquote',
+      'a',
+      'img',
+    ],
+    allowedAttributes: {
+      a: ['href', 'name', 'target'],
+      img: ['src'],
+      li: ['class'],
+    },
+    allowedSchemes: ['data', 'http'],
+  };
 
 // export const checkObjectId = (ctx, next) => {
 //     const { id } = ctx.params;
@@ -75,7 +101,7 @@ export const write = async ctx => {
     const { title, body, tags } = ctx.request.body;
     const post = new Post({
         title, 
-        body, 
+        body: sanitizeHtml(body, sanitizeOption), 
         tags,
         user: ctx.state.user, // 글작성시 사용자 정보 추가 
     });
@@ -87,6 +113,14 @@ export const write = async ctx => {
         ctx.throw(500, e);
     }
 };
+
+// db에 저장할 때 html 제거하고 글자 길면 ...으로 표시. 기존에 ctx.body에 있던 것을 함수로 뺌. 
+const removeHtmlAndShorten = body => {
+    const filtered = sanitizeHtml(body, {
+      allowedTags: [],
+    });
+    return filtered.length < 10 ? filtered : `${filtered.slice(0, 10)}...`;
+  };
 
 // 글목록 
 export const list = async ctx => {
@@ -124,8 +158,7 @@ export const list = async ctx => {
             .map(post => post.toJSON())
             .map(post => ({
                 ...post,
-                body:
-                    post.body.length < 2 ? post.body : `${post.body.slice(0, 2)}...`, // 싱글쿼터가 아니라 키보드 1왼쪽에 있는 키 
+                body: removeHtmlAndShorten(post.body),
             }));
     } catch (e)  {
         ctx.throw(500, e);
@@ -181,13 +214,20 @@ export const update = async ctx => {
         ctx.body = result.error;
         return;
     }
+
+    const nextData = { ...ctx.request.body }; // 객체를 복사하고
+    // body 값이 주어졌으면 HTML 필터링
+    if (nextData.body) {
+      nextData.body = sanitizeHtml(nextData.body);
+    }
+
     try {
         /* findByIdAndUpdate함수는 매개변수가 3개 
             첫번째: id
             두번째: 수정할 내용
             세번째: true면 수정 후 데이터 post에 저장 
                     false면 수정 전 데이터 post에 저장*/
-        const post = await Post.findByIdAndUpdate(id, ctx.request.body, { new: true, }).exec();
+        const post = await Post.findByIdAndUpdate(id, nextData, { new: true, }).exec();
         if(!post) {
             ctx.status = 404;
             return;

@@ -12,6 +12,11 @@ import bodyParser from 'koa-bodyparser';
 // mongoose 가져오기 
 import mongoose from 'mongoose';
 
+// 프론트엔드 빌드 파일 사용을 위해 추가 
+import serve from 'koa-static';
+import path from 'path';
+import send from 'koa-send';
+
 // api 폴더에 생성한 index.js 사용 
 import api from './api';
 // 토큰 검증을 위한 미들웨어 적용 
@@ -50,6 +55,17 @@ app.use(jwtMiddleware);
 
 // app 인스턴스에 라우터 적용 
 app.use(router.routes()).use(router.allowedMethods());
+
+// koa-static 사용한 정적파일 제공 기능 
+const buildDirectory = path.resolve(__dirname, '../../frontend1/build');
+app.use(serve(buildDirectory));
+app.use(async ctx => {
+  // Not Found 이고, 주소가 /api 로 시작하지 않는 경우
+  if (ctx.status === 404 && ctx.path.indexOf('/api') !== 0) {
+    // index.html 내용을 반환
+    await send(ctx, 'index.html', { root: buildDirectory });
+  }
+});
 
 // .env에 PORT 지정 안되어있으면 4000을 사용하도록 
 const port = PORT || 4000;
